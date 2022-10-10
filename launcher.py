@@ -12,6 +12,7 @@ from datetime import datetime
 
 from LauncherProfile import LauncherProfile
 from ProfileDialog import ProfileDialog
+from WelcomeScreen import WelcomeScreen
 
 
 class GameOutputWidget(QPlainTextEdit):
@@ -154,13 +155,13 @@ class MainWindow(QDialog):
 			
 		
 		self.tabs = QTabWidget()
-		tab1 = QWidget()
+		tab1 = WelcomeScreen()
 		
 		self.launcherLog = QPlainTextEdit()
 		self.launcherLog.setReadOnly(True)
 		self.launcherLog.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
 		
-		self.tabs.addTab(tab1, "Update Notes")
+		self.tabs.addTab(tab1, "Welcome")
 		self.tabs.addTab(self.launcherLog, "Launcher log")
 		
 		self.installationProgress = QProgressBar()
@@ -347,6 +348,8 @@ class MainWindow(QDialog):
 			self.profileComboBox.addItem(name)
 		if selectedIndex > -1:
 			self.profileComboBox.setCurrentIndex(selectedIndex)
+		
+		self.log("Loaded " + str(len(self.launcherProfiles)) + " profiles")
 		
 	def play(self):
 		options = {}
