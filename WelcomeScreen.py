@@ -1,6 +1,8 @@
+from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (QHBoxLayout, QVBoxLayout, QFrame,
 		QWidget, QPushButton, QLabel)
 
+import os
 import minecraft_launcher_lib
 
 class QLink(QLabel):
@@ -13,10 +15,12 @@ class WelcomeScreen(QFrame):
 	def __init__(self, parent=None):
 		super(WelcomeScreen, self).__init__(parent)
 		
+		QDir.addSearchPath('images', os.path.dirname(os.path.realpath(__file__)) + "/img")
+		
 		self.setObjectName("body")
 		self.setStyleSheet("""
 			QFrame {
-				background-image: url(./img/bg_main.png);
+				background-image: url(images:bg_main.png);
 			}
 			QLabel {
 				background: rgba(0, 0, 0, 0);
@@ -77,7 +81,7 @@ class WelcomeScreen(QFrame):
 		linksLabel = QLabel("Links")
 		linksLabel.setObjectName("subheader")
 		
-		repo = QLink("Github", "")
+		repo = QLink("Github", "https://github.com/ElEd0/real-mc-launcher")
 		ed0es = QLink("My webpage", "https://ed0.es")
 		mcLauncherLib = QLink("JakobDev's minecraft-launcher-lib", "https://gitlab.com/JakobDev/minecraft-launcher-lib")
 		mcLauncherApi = QLink("Tomsik68's mclauncher-api", "https://github.com/tomsik68/mclauncher-api/wiki")

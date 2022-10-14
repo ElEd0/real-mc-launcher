@@ -9,7 +9,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-		('img/icon.png', '.'),
+		('img', 'img'),
 		('venv/lib/python3.10/site-packages/minecraft_launcher_lib/version.txt', 'minecraft_launcher_lib')
 	],
     hiddenimports=[],

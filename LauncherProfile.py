@@ -5,7 +5,8 @@ import minecraft_launcher_lib
 class LauncherProfile():
 	
 	
-	def __init__(self, id=None, data={}): 
+	def __init__(self, id=None, data={}):
+		self.isNew = id == None
 		self.id = (id if id != None else self.genId())
 		self.name = self.get(data, 'name', "")
 		self.created = self.get(data, 'created', "1970-01-01T00:00:00.000Z")

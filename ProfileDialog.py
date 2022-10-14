@@ -1,14 +1,16 @@
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QIntValidator
-from PyQt5.QtWidgets import (QApplication, QDialog, QErrorMessage,
+from PyQt5.QtWidgets import (QApplication, QDialog, QErrorMessage, QMessageBox,
 		QFormLayout, QHBoxLayout, QVBoxLayout, QGroupBox,
 		QPushButton, QLabel, QComboBox, QCheckBox, QLineEdit)
 
+import os
 import minecraft_launcher_lib
 from LauncherProfile import LauncherProfile
 
 class ProfileDialog(QDialog):
-	profileSignal = pyqtSignal(object)
+	profileSaveSignal = pyqtSignal(object)
+	profileDeleteSignal = pyqtSignal(object)
 	
 	def __init__(self, profile, parent=None):
 		super(ProfileDialog, self).__init__(parent)
@@ -55,6 +57,7 @@ class ProfileDialog(QDialog):
 		self.customLauncherVisibility.setChecked(self.profile.launcherVisibility != self.defaultProfile.launcherVisibility)
 		self.customLauncherVisibility.stateChanged.emit(self.customLauncherVisibility.checkState())
 		
+		# currently not used
 		self.crashAssistance = QCheckBox("Automatically ask Mojang for assistance with fixing crashes")
 		self.crashAssistance.setChecked(self.profile.useHopperCrashService != self.defaultProfile.useHopperCrashService)
 		
@@ -110,13 +113,17 @@ class ProfileDialog(QDialog):
 		
 		
 		cancel = QPushButton("Cancel")
+		delete = QPushButton("Delete Profile")
 		save = QPushButton("Save Profile")
 		cancel.clicked.connect(lambda: self.close())
+		delete.clicked.connect(self.deleteProfile)
 		save.clicked.connect(self.saveProfile)
+		if self.profile.isNew: delete.setEnabled(False)
 		
 		buttonsLayout = QHBoxLayout()
 		buttonsLayout.addWidget(cancel)
 		buttonsLayout.addStretch(1)
+		buttonsLayout.addWidget(delete)
 		buttonsLayout.addWidget(save)
 		
 		profileInfoContainer = QGroupBox("Profile Info")
@@ -134,7 +141,7 @@ class ProfileDialog(QDialog):
 		mainLayout.addLayout(buttonsLayout)
 		
 		self.setLayout(mainLayout)
-		self.setWindowIcon(QIcon("img/icon.png"))
+		self.setWindowIcon(QIcon(os.path.dirname(os.path.realpath(__file__)) + "/img/icon.png"))
 		self.setWindowTitle("Profile Editor")
 		
 		self.populateVersionBox()
@@ -158,7 +165,14 @@ class ProfileDialog(QDialog):
 			
 		if selectedIndex > -1:
 			self.versionBox.setCurrentIndex(selectedIndex)
-		print(str(selectedIndex))
+		
+	def deleteProfile(self):
+		reply = QMessageBox.question(self, 'Delete profile', 'Are you sure you want to delete profile '+self.profile.name+'?',
+			QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+		if reply == QMessageBox.Cancel:
+			return
+		self.profileDeleteSignal.emit(self.profile)
+		self.close()
 	
 	def saveProfile(self):
 		name = str(self.name.text().strip())
@@ -205,7 +219,7 @@ class ProfileDialog(QDialog):
 		self.profile.beta = beta
 		self.profile.alpha = alpha
 		
-		self.profileSignal.emit(self.profile)
+		self.profileSaveSignal.emit(self.profile)
 		self.close()
 		
 	def showError(self, msg):
