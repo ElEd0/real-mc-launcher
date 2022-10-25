@@ -23,6 +23,7 @@ class WelcomeScreen(QFrame):
 				background-image: url(images:bg_main.png);
 			}
 			QLabel {
+				color: white;
 				background: rgba(0, 0, 0, 0);
 			}
 			QLabel#header {

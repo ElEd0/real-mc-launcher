@@ -102,7 +102,7 @@ class CloseDialog(QDialog):
 	
 	def __init__(self, parent, runningInstances):
 		super(CloseDialog, self).__init__(parent)
-		self.setWindowModality(Qt.ApplicationModal)
+		self.setWindowModality(PyQt5.Qt.ApplicationModal)
 		
 		msg = ("ATTENTION! You are running minecraft instances, if you close the launcher the instances will close.\n"
 		"Do you wish to end this instances or minimize the launcher to the system tray?\n\n"
@@ -489,6 +489,7 @@ class MainWindow(QDialog):
 		options['resolutionHeight'] = str(selectedProfile.height)
 		
 		self.playButton.setEnabled(False)
+		self.playOpts.setEnabled(False)
 		
 		
 		def _install_thread_finished() -> None:
@@ -504,6 +505,7 @@ class MainWindow(QDialog):
 			index = self.tabs.addTab(gameLog, selectedProfile.name)
 			self.tabs.setCurrentIndex(index)
 			self.playButton.setEnabled(True)
+			self.playOpts.setEnabled(True)
 			
 		versionInstalled = False
 		for version in minecraft_launcher_lib.utils.get_installed_versions(self.minecraftDir):
