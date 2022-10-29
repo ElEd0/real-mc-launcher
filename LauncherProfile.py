@@ -12,9 +12,9 @@ class LauncherProfile():
 		self.created = self.get(data, 'created', "1970-01-01T00:00:00.000Z")
 		self.lastUsed = self.get(data, 'lastUsed', "1970-01-01T00:00:00.000Z")
 		self.lastVersionId = self.get(data, 'lastVersionId', "")
-		self.gameDir = self.get(data, 'gameDir', minecraft_launcher_lib.utils.get_minecraft_directory())
-		self.javaArgs = self.get(data, 'javaArgs', "")
-		self.javaDir = self.get(data, 'javaDir', minecraft_launcher_lib.utils.get_java_executable())
+		self.gameDir = self.get(data, 'gameDir', None)
+		self.javaDir = self.get(data, 'javaDir', None)
+		self.javaArgs = self.get(data, 'javaArgs', None)
 		data['resolution'] = self.get(data, 'resolution', {})
 		self.width = self.get(data['resolution'], 'width', 854)
 		self.height = self.get(data['resolution'], 'height', 480)
@@ -41,9 +41,6 @@ class LauncherProfile():
 			'created': self.created,
 			'lastUsed': self.lastUsed,
 			'lastVersionId': self.lastVersionId,
-			'gameDir': self.gameDir,
-			'javaDir': self.javaDir,
-			'javaArgs': self.javaArgs,
 			'resolution': {
 				'width': self.width,
 				'height': self.height
@@ -54,6 +51,12 @@ class LauncherProfile():
 			'useHopperCrashService': self.useHopperCrashService,
 			'launcherVisibility': self.launcherVisibility
 		}
+		if self.gameDir != None and len(self.gameDir) != 0:
+			data['gameDir'] = self.gameDir
+		if self.javaDir != None and len(self.javaDir) != 0:
+			data['javaDir'] = self.javaDir
+		if self.javaArgs != None and len(self.javaArgs) != 0:
+			data['javaArgs'] = self.javaArgs
 		return data
 	
 		

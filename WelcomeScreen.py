@@ -56,7 +56,11 @@ class WelcomeScreen(QFrame):
 		changelogHeader.setObjectName("subheader")
 		
 		changelog = {
-			"1.0 pre-release": [
+			"1.1": [
+				"Detached Minecraft process (Linux)",
+				"Delete profile button"
+			],
+			"1.0": [
 				"First functional release (beta)"
 			]
 		}

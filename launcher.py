@@ -1,76 +1,19 @@
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QThread, QProcess, pyqtSignal
+from PyQt5.QtCore import Qt, QThread, QProcess, pyqtSignal
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (QApplication, QDialog, QWidget, QErrorMessage, QMessageBox,
-		QHBoxLayout, QVBoxLayout, QGroupBox,
+		QMainWindow, QSizePolicy, QHBoxLayout, QVBoxLayout, QGroupBox,
 		QPushButton, QLabel, QComboBox, QPlainTextEdit, QCheckBox,
 		QTabWidget, QLineEdit, QProgressBar,
 		QSystemTrayIcon, QMenu)
 
 import minecraft_launcher_lib, requests
-import sys, os, json
+import sys, os, platform, json
 from datetime import datetime
 
 from LauncherProfile import LauncherProfile
 from ProfileDialog import ProfileDialog
 from WelcomeScreen import WelcomeScreen
-
-
-class GameOutputWidget(QPlainTextEdit):
-	def __init__(self):
-		super().__init__()
-		self.setReadOnly(True)
-		self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
-		self.isRunning = False
-
-	def onProcessRead(self):
-		self.log(bytes(self.process.readAll()).decode())
-		
-	def onProcessFinished(self):
-		self.setRunning(False)
-		self.log("Minecraft process finished\n")
-	
-	def log(self, output):
-		cursor = self.textCursor()
-		cursor.movePosition(cursor.MoveOperation.End)
-		cursor.insertText(output)
-		cursor.movePosition(cursor.MoveOperation.End)
-		self.ensureCursorVisible()
-		
-	def setRunning(self, running):
-		self.isRunning = running
-		
-	def execute_command(self, command, arguments):
-		self.setPlainText("")
-		
-		self.process = QProcess()
-		self.process.finished.connect(self.onProcessFinished)
-		self.process.readyRead.connect(self.onProcessRead)
-		self.process.start(command, arguments)
-		self.setRunning(True)
-		self.log("Minecraft process started\n")
-		'''
-		self.gameThread = GameThread(self, arguments)
-		self.gameThread.outputSignal.connect(lambda output: self.display_output(output))
-		self.gameThread.finished.connect(lambda: self.setRunning(False))
-		self.gameThread.start()
-		self.setRunning(True)
-
-class GameThread(QThread):
-	outputSignal = pyqtSignal(str)
-
-	def __init__(self, parent, arguments) -> None:
-		QThread.__init__(self)
-		self.arguments = arguments
-		self.parent = parent
-
-	def run(self) -> None:
-		self.process = QProcess()
-		self.process.finished.connect(lambda: self.finished.emit())
-		self.process.readyRead.connect(lambda: self.outputSignal.emit(bytes(self.process.readAll()).decode()))
-		self.process.start("java", self.arguments)
-		#print(' '.join(self.arguments))
-		self.process.waitForFinished(-1)
-		'''
+from GameInstanceWidget import GameInstanceWidget
 
 
 class InstallThread(QThread):
@@ -94,15 +37,31 @@ class InstallThread(QThread):
 	def run(self) -> None:
 		try:
 			minecraft_launcher_lib.install.install_minecraft_version(self._version, self._directory, callback=self._callback_dict)
-		except Error as e:
+		except Exception as e:
 			self.errorSignal.emit(str(e))
+
+
+class CheckNetworkThread(QThread):
+
+	def __init__(self, callback) -> None:
+		QThread.__init__(self)
+		self.callback = callback
+
+	def run(self) -> None:
+		try:
+			import socket
+			socket.create_connection(("1.1.1.1", 53))
+			self.callback(True)
+		except Error as e:
+			self.callback(False)
+
 
 class CloseDialog(QDialog):
 	closeSignal = pyqtSignal(bool)
 	
 	def __init__(self, parent, runningInstances):
 		super(CloseDialog, self).__init__(parent)
-		self.setWindowModality(PyQt5.Qt.ApplicationModal)
+		self.setWindowModality(Qt.ApplicationModal)
 		
 		msg = ("ATTENTION! You are running minecraft instances, if you close the launcher the instances will close.\n"
 		"Do you wish to end this instances or minimize the launcher to the system tray?\n\n"
@@ -140,26 +99,15 @@ class CloseDialog(QDialog):
 		self.closeSignal.emit(closeLauncher)
 		self.close()
 		
-
-class CheckNetworkThread(QThread):
-
-	def __init__(self, callback) -> None:
-		QThread.__init__(self)
-		self.callback = callback
-
-	def run(self) -> None:
-		try:
-			import socket
-			socket.create_connection(("1.1.1.1", 53))
-			self.callback(True)
-		except Error as e:
-			self.callback(False)
-
-			
-class MainWindow(QDialog):
-	def __init__(self, parent=None):
-		super(MainWindow, self).__init__(parent)
 		
+class MainWindow(QMainWindow):
+	
+	VERSION = "1.1"
+	
+	def __init__(self):
+		super(MainWindow, self).__init__()
+		
+		self.platform = platform.system()
 		self.hasInternet = False
 		self.minecraftDir = minecraft_launcher_lib.utils.get_minecraft_directory()
 		
@@ -174,7 +122,10 @@ class MainWindow(QDialog):
 			with open(self.minecraftDir + "/real_mc_launcher.json") as f:
 				self.launcherSettings = self.launcherSettings | json.loads(f.read())
 				f.close()
-			
+		
+		self.settings = QPushButton("")
+		settingsPixmap = QPixmap(os.path.dirname(os.path.realpath(__file__)) + "/img/settings.png")
+		self.settings.setIcon(QIcon(settingsPixmap))
 		
 		self.tabs = QTabWidget()
 		tab1 = WelcomeScreen()
@@ -307,6 +258,11 @@ class MainWindow(QDialog):
 		accountContainer.setFixedWidth(270)
 		
 		
+		# settings container
+		settingsContainer = QVBoxLayout()
+		settingsContainer.addStretch()
+		settingsContainer.addWidget(self.settings)
+		
 		# bottom container
 		bottomContainer = QHBoxLayout()
 		bottomContainer.addWidget(profileContainer)
@@ -317,15 +273,19 @@ class MainWindow(QDialog):
 		
 		# main layout
 		mainLayout = QVBoxLayout()
+		#mainLayout.addLayout(settingsContainer)
 		mainLayout.addWidget(self.tabs)
 		mainLayout.addWidget(self.installationProgress)
 		mainLayout.addLayout(bottomContainer)
 		
-		icon = QIcon(os.path.dirname(os.path.realpath(__file__)) + "/img/icon.png")
 		
-		self.setLayout(mainLayout)
+		mainQWidget = QWidget()
+		mainQWidget.setLayout(mainLayout)
+		self.setCentralWidget(mainQWidget)
+		
+		icon = QIcon(os.path.dirname(os.path.realpath(__file__)) + "/img/icon.png")
 		self.setWindowIcon(icon)
-		self.setWindowTitle("Real MC Launcher INDEV 1.0")
+		self.setWindowTitle("Real MC Launcher " + self.VERSION)
 		
 		# system tray icon
 		self.sysTray = QSystemTrayIcon(self)
@@ -452,8 +412,9 @@ class MainWindow(QDialog):
 		
 		self.log("Using MSA: " + str(useMSA))
 		if (useMSA):
-			self.log("UNIMPLEMENTED")
 			# TODO ms auth
+			self.log("UNIMPLEMENTED")
+			return
 		else:
 			playerName = str(self.playerField.text().strip())
 			if (len(playerName) == 0):
@@ -464,10 +425,13 @@ class MainWindow(QDialog):
 			
 			playerUuid = self.launcherSettings['uuid']
 			if not forceOffline:
-				uuidR = requests.get("https://api.mojang.com/users/profiles/minecraft/" + playerName).text
-				if len(uuidR) != 0:
-					uuidJ = json.loads(uuidR)
-					playerUuid = uuidJ['id']
+				try:
+					uuidR = requests.get("https://api.mojang.com/users/profiles/minecraft/" + playerName).text
+					if len(uuidR) != 0:
+						uuidJ = json.loads(uuidR)
+						playerUuid = uuidJ['id']
+				except Error as e:
+					pass
 				
 			self.log("Player: " + playerName + " (UUID: " + playerUuid + ")")
 			self.launcherSettings['playerName'] = playerName
@@ -500,12 +464,16 @@ class MainWindow(QDialog):
 			arguments = command[1:]
 			command = options['executablePath'] if 'executablePath' in options else 'java'
 		
-			gameLog = GameOutputWidget()
-			gameLog.execute_command(command, arguments)
+			gameLog = GameInstanceWidget()
 			index = self.tabs.addTab(gameLog, selectedProfile.name)
 			self.tabs.setCurrentIndex(index)
+			gameLog.execute_command(command, arguments)
 			self.playButton.setEnabled(True)
 			self.playOpts.setEnabled(True)
+			
+			if selectedProfile.launcherVisibility == 0: # close launcher (to sysTray)
+				self.sysTray.show()
+				self.hide()
 			
 		versionInstalled = False
 		for version in minecraft_launcher_lib.utils.get_installed_versions(self.minecraftDir):
@@ -552,29 +520,25 @@ class MainWindow(QDialog):
 		else:
 			self.launcherLog.appendPlainText(msg)
 	
-	ignoreCloseEvent = False
+	
 	def closeEvent(self, event):
-		if self.ignoreCloseEvent:
-			event.accept()
-			return
 		runningTabs = []
 		for i in range(self.tabs.count()):
 			tab = self.tabs.widget(i)
-			if not isinstance(tab, GameOutputWidget):
+			if not isinstance(tab, GameInstanceWidget):
 				continue
 			if tab.isRunning:
-				runningTabs.append(self.tabs.tabText(i))
+				if tab.startDetached:
+					tab.stopThread()
+				else:
+					runningTabs.append(self.tabs.tabText(i))
 		
 		if len(runningTabs) == 0:
-			event.accept()
 			sys.exit()
 		else:
 			event.ignore()
 			def on_close_signal(close):
 				if close:
-					# we cant use event.accept() cause we already ignored it
-					self.ignoreCloseEvent = True
-					self.close()
 					sys.exit()
 				else:
 					self.sysTray.show()
@@ -583,6 +547,7 @@ class MainWindow(QDialog):
 			closeDialog = CloseDialog(self, runningTabs)
 			closeDialog.closeSignal.connect(on_close_signal)
 			closeDialog.show()
+
 
 if __name__ == '__main__':
 	app = QApplication([])

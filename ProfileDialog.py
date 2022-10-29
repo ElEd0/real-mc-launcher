@@ -26,10 +26,15 @@ class ProfileDialog(QDialog):
 		
 		self.customGameDir = QCheckBox("Game Directory:")
 		self.gameDir = QLineEdit()
-		self.gameDir.setText(self.profile.gameDir)
 		self.customGameDir.stateChanged.connect(lambda: self.gameDir.setEnabled(self.customGameDir.isChecked()))
-		self.customGameDir.setChecked(self.profile.gameDir != self.defaultProfile.gameDir)
+		if self.profile.gameDir == None:
+			self.gameDir.setText(minecraft_launcher_lib.utils.get_minecraft_directory())
+			self.customGameDir.setChecked(False)
+		else:
+			self.gameDir.setText(self.profile.gameDir)
+			self.customGameDir.setChecked(True)
 		self.customGameDir.stateChanged.emit(self.customGameDir.checkState())
+		
 		
 		self.customSize = QCheckBox("Resolution:")
 		self.width = QLineEdit()
@@ -58,8 +63,8 @@ class ProfileDialog(QDialog):
 		self.customLauncherVisibility.stateChanged.emit(self.customLauncherVisibility.checkState())
 		
 		# currently not used
-		self.crashAssistance = QCheckBox("Automatically ask Mojang for assistance with fixing crashes")
-		self.crashAssistance.setChecked(self.profile.useHopperCrashService != self.defaultProfile.useHopperCrashService)
+		#self.crashAssistance = QCheckBox("Automatically ask Mojang for assistance with fixing crashes")
+		#self.crashAssistance.setChecked(self.profile.useHopperCrashService != self.defaultProfile.useHopperCrashService)
 		
 		profileInfoLayout = QFormLayout()
 		profileInfoLayout.addRow(QLabel("Profile Name:"), self.name)
@@ -95,16 +100,24 @@ class ProfileDialog(QDialog):
 		
 		self.customJavaDir = QCheckBox("Executable:")
 		self.javaDir = QLineEdit()
-		self.javaDir.setText(self.profile.javaDir)
 		self.customJavaDir.stateChanged.connect(lambda: self.javaDir.setEnabled(self.customJavaDir.isChecked()))
-		self.customJavaDir.setChecked(self.profile.javaDir != self.defaultProfile.javaDir)
+		if self.profile.javaDir == None:
+			self.javaDir.setText(minecraft_launcher_lib.utils.get_java_executable())
+			self.customJavaDir.setChecked(False)
+		else:
+			self.javaDir.setText(self.profile.javaDir)
+			self.customJavaDir.setChecked(True)
 		self.customJavaDir.stateChanged.emit(self.customJavaDir.checkState())
 		
 		self.customJavaArgs = QCheckBox("JVM arguments:")
 		self.javaArgs = QLineEdit()
-		self.javaArgs.setText(self.profile.javaArgs)
 		self.customJavaArgs.stateChanged.connect(lambda: self.javaArgs.setEnabled(self.customJavaArgs.isChecked()))
-		self.customJavaArgs.setChecked(self.profile.javaArgs != self.defaultProfile.javaArgs)
+		if self.profile.javaArgs == None:
+			self.javaArgs.setText("")
+			self.customJavaArgs.setChecked(False)
+		else:
+			self.javaArgs.setText(self.profile.javaArgs)
+			self.customJavaArgs.setChecked(True)
 		self.customJavaArgs.stateChanged.emit(self.customJavaArgs.checkState())
 		
 		javaLayout = QFormLayout()
@@ -176,7 +189,7 @@ class ProfileDialog(QDialog):
 	
 	def saveProfile(self):
 		name = str(self.name.text().strip())
-		gameDir = str(self.gameDir.text().strip()) if self.customGameDir.isChecked() else self.defaultProfile.gameDir
+		gameDir = str(self.gameDir.text().strip()) if self.customGameDir.isChecked() else None
 		width = str(self.width.text().strip()) if self.customSize.isChecked() else self.defaultProfile.width
 		height = str(self.height.text().strip()) if self.customSize.isChecked() else self.defaultProfile.height
 		launcherVisibility = self.launcherVisibility.currentIndex() if self.customLauncherVisibility.isChecked() else self.defaultProfile.launcherVisibility
@@ -186,16 +199,16 @@ class ProfileDialog(QDialog):
 		alpha = self.enableAlpha.isChecked()
 		version = self.versionBox.currentText()
 		
-		javaDir = str(self.javaDir.text().strip()) if self.customJavaDir.isChecked() else self.defaultProfile.javaDir
-		javaArgs = str(self.javaArgs.text().strip()) if self.customJavaArgs.isChecked() else self.defaultProfile.javaArgs
+		javaDir = str(self.javaDir.text().strip()) if self.customJavaDir.isChecked() else None
+		javaArgs = str(self.javaArgs.text().strip()) if self.customJavaArgs.isChecked() else None
 		
 		if (len(name) == 0):
 			self.showError("Fill in the profile name")
 			return
-		if (len(gameDir) == 0):
+		if (gameDir != None and len(gameDir) == 0):
 			self.showError("Invalid Game directory")
 			return
-		if (len(javaDir) == 0):
+		if (javaDir != None and len(javaDir) == 0):
 			self.showError("Invalid Java directory")
 			return
 		width = 100 if width == "" else int(width)

@@ -10,7 +10,7 @@ a = Analysis(
     binaries=[],
     datas=[
 		('img', 'img'),
-		('venv/lib/python3.10/site-packages/minecraft_launcher_lib/version.txt', 'minecraft_launcher_lib')
+		('version.txt', 'minecraft_launcher_lib')
 	],
     hiddenimports=[],
     hookspath=[],
@@ -44,4 +44,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+	icon='img/icon.ico'
 )
