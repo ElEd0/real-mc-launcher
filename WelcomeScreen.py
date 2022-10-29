@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QDir
-from PyQt5.QtWidgets import (QHBoxLayout, QVBoxLayout, QFrame,
+from PyQt5.QtWidgets import (QHBoxLayout, QVBoxLayout, QFrame, QScrollArea,
 		QWidget, QPushButton, QLabel)
 
 import os
@@ -10,7 +10,7 @@ class QLink(QLabel):
 		super().__init__("<a href=" + link + ">" + text + "</a>")
 		self.setOpenExternalLinks(True)
 
-class WelcomeScreen(QFrame):
+class WelcomeScreen(QScrollArea):
 	
 	def __init__(self, parent=None):
 		super(WelcomeScreen, self).__init__(parent)
@@ -106,8 +106,9 @@ class WelcomeScreen(QFrame):
 		mainLayout.addStretch()
 		mainLayout.addLayout(right)
 		
-		self.setLayout(mainLayout)
-		
+		qFrame = QFrame()
+		qFrame.setLayout(mainLayout)
+		self.setWidget(qFrame)
 		
 		
 		

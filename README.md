@@ -3,6 +3,8 @@
 Real MC launcher is a minecraft launcher designed from the ground up to mimic the old launcher, both in appearance and functionality.
 It's coded in PyQt5 using [minecraft-launcher-lib](https://minecraft-launcher-lib.readthedocs.io/en/stable/index.html#)
 
+![](img/preview.png)
+
 #### Features
 - Simple and intuitive UI
 - Old-style profiles compatible with new launcher (official)
@@ -17,7 +19,7 @@ Even then, I will probably never release a version with my Client ID embedded ca
 #### More
 - The launcher has been tested in minecraft versions: 1.8.x, 1.12.x, 1.16.x and 1.19.x. But it probably works with all releases and snapshots
 - Optifine has been tested
-- Forge has NOT been tested, but it probably works (I hope)
+- Forge has been tested
 
 #### Building 
 Project dependencies are:
