@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QApplication, QDialog, QWidget, QErrorMessage, QMes
 		QSystemTrayIcon, QMenu)
 
 import minecraft_launcher_lib, requests
-import sys, os, platform, json
+import sys, os, platform, json, uuid
 from datetime import datetime
 
 from LauncherProfile import LauncherProfile
@@ -52,7 +52,7 @@ class CheckNetworkThread(QThread):
 			import socket
 			socket.create_connection(("1.1.1.1", 53))
 			self.callback(True)
-		except Error as e:
+		except Exception as e:
 			self.callback(False)
 
 
@@ -281,6 +281,7 @@ class MainWindow(QMainWindow):
 		
 		mainQWidget = QWidget()
 		mainQWidget.setLayout(mainLayout)
+		self.resize(830, 386)
 		self.setCentralWidget(mainQWidget)
 		
 		icon = QIcon(os.path.dirname(os.path.realpath(__file__)) + "/img/icon.png")
@@ -429,9 +430,15 @@ class MainWindow(QMainWindow):
 					uuidR = requests.get("https://api.mojang.com/users/profiles/minecraft/" + playerName).text
 					if len(uuidR) != 0:
 						uuidJ = json.loads(uuidR)
-						playerUuid = uuidJ['id']
-				except Error as e:
+						if uuidJ is not None and 'id' in uuidJ:
+							playerUuid = uuidJ['id']
+				except Exception as e:
 					pass
+				
+			if playerUuid == "":
+				playerUuid = uuid.uuid4().hex
+				
+				
 				
 			self.log("Player: " + playerName + " (UUID: " + playerUuid + ")")
 			self.launcherSettings['playerName'] = playerName
