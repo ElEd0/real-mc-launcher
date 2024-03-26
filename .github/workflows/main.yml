@@ -1,0 +1,29 @@
+
+name: Package Application with Pyinstaller
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Build (Linux)
+      uses: JackMcKew/pyinstaller-action-linux@main
+      with:
+        path: .
+
+    - name: Release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dist/launcher
+        asset_name: launcher-linux-amd64-${{ github.ref }}
+        tag: ${{ github.ref }}
