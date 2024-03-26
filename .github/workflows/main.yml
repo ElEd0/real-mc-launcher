@@ -5,7 +5,6 @@ on:
   push:
     tags:
       - "v*.*.*"
-  workflow_dispatch:
 
 jobs:
   build:
@@ -20,11 +19,24 @@ jobs:
       uses: JackMcKew/pyinstaller-action-linux@python3.10
       with:
         path: .
+        
+    - name: Build (Windows)
+      uses: JackMcKew/pyinstaller-action-windows@python3-10-pyinstaller-5-3
+      with:
+        path: .
 
-    - name: Release
+    - name: Release (Linux)
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: dist/linux/launcher
         asset_name: launcher-linux-amd64-${{ github.ref_name }}
+        tag: ${{ github.ref }}
+
+    - name: Release (Windows)
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dist/windows/launcher.exe
+        asset_name: launcher-win-amd64-${{ github.ref_name }}
         tag: ${{ github.ref }}
