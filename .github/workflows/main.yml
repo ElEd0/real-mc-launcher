@@ -25,6 +25,6 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: dist/launcher
+        file: dist/linux/launcher
         asset_name: launcher-linux-amd64-${{ github.ref_name }}
         tag: ${{ github.ref }}
