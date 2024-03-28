@@ -1,7 +1,9 @@
 ### Real-MC-Launcher
 
+![build](https://github.com/ElEd0/real-mc-launcher/actions/workflows/main.yml/badge.svg)
+
 Real MC launcher is a minecraft launcher designed from the ground up to mimic the old launcher, both in appearance and functionality.
-It's coded in PyQt5 using [minecraft-launcher-lib](https://minecraft-launcher-lib.readthedocs.io/en/stable/index.html#)
+It uses PyQt5 and [minecraft-launcher-lib](https://minecraft-launcher-lib.readthedocs.io/en/stable/index.html#)
 
 ![](img/preview.png)
 
@@ -18,8 +20,11 @@ Even then, I will probably never release a version with my Client ID embedded ca
 
 #### More
 - The launcher has been tested in minecraft versions: 1.8.x, 1.12.x, 1.16.x and 1.19.x. But it probably works with all releases and snapshots
-- Optifine has been tested
-- Forge has been tested
+- Optifine works
+- Forge works
+
+#### Binaries 
+A builded launcher executable is available for Linux and Windows in the [releases](https://github.com/ElEd0/real-mc-launcher/releases) page.
 
 #### Building 
 Project dependencies are:
