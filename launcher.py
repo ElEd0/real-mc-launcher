@@ -102,7 +102,7 @@ class CloseDialog(QDialog):
 		
 class MainWindow(QMainWindow):
 	
-	VERSION = "1.1"
+	VERSION = "1.1.0"
 	
 	def __init__(self):
 		super(MainWindow, self).__init__()

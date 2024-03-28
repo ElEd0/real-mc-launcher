@@ -56,12 +56,12 @@ class WelcomeScreen(QScrollArea):
 		changelogHeader.setObjectName("subheader")
 		
 		changelog = {
-			"1.1": [
+			"1.1.0": [
 				"Detached Minecraft process (Linux)",
 				"Delete profile button"
 			],
-			"1.0": [
-				"First functional release (beta)"
+			"1.0.0": [
+				"First functional pre-release"
 			]
 		}
 		
